@@ -1,0 +1,165 @@
+<html xmlns:ng="http://angularjs.org" ng-app="myApp">
+<head>
+	<title>Hello Worl</title>
+	<style type="text/css">
+		html[ng-app="myApp"] {
+			background: pink;
+			font-family: 'Courier new';
+			font-size: 14px;
+		}
+		h5 { margin: 20px 0 5px; }
+		small {
+			display: block;
+			margin-bottom: 5px;
+		}
+		input {
+			margin-bottom: 5px;
+			outline: none;
+		}
+		/* ng style */
+		.ng-invalid.ng-dirty {
+			border-color: red;
+		}
+	</style>
+</head>
+<body>
+
+	<!--
+	*
+	* TODO: Upload this on Git
+	*
+	-->
+	<div ng-controller="ctrl1">
+		<h5>Data binding using double-curly interpolation</h5>
+		{{ messages.data1 }}<br>
+		{{ messages.data2 }}
+
+		<h5>Data binding using ng-bind (loads cleaner)</h5>
+		<div ng-bind="messages.data3"></div>
+	</div>
+
+	<form ng-controller="ctrl2">
+		<h5>Checkbox and radio button with ng-model=boolean</h5>
+		<input type="checkbox" ng-model="yourCheckEdit">{{yourCheckEdit}}
+		<input type="radio" ng-model="yourCheckEdit2">{{yourCheckEdit2}}
+	</form>
+
+	<form ng-controller="StartUpController">
+		<h5>ng-change vs $watch</h5>
+		Starting: <input ng-model="funding.startEstimate"><br>
+		Recommendation: {{ funding.needed }}
+	</form>
+
+	<form ng-submit="requestOrder()" ng-controller="coffeeOrderControl">
+		<h5>Order coffee here!</h5>
+		Quantity: <input ng-change="computePrice()" ng-model="quantity"><br>
+		Total: {{ total | currency }}<br>
+		<button>Order now</button>
+		<input type="button" value="Reset" ng-click="resetOrder()">
+	</form>
+
+	<div ng-controller="formController1">
+		<h5>Simple form</h5>
+		<small>Note that <i>novalidate</i> is used to disable browser's native form validation.</small>
+		<form name="form" class="simpleform" novalidate>
+			Name: <input type="text" ng-model="user.name" name="uName" required><br>
+			Email: <input type="email" ng-model="user.email" name="uEmail" required><br>
+			<div ng-show="form.uEmail.$dirty && form.uEmail.$invalid">
+				Invalid:
+				<span ng-show="form.uEmail.$error.required"> Tell us your email.</span>
+				<span ng-show="form.uEmail.$error.email"> This is not a valid email.</span>
+			</div>
+			Gender: <input type="radio" ng-model="user.gender" value="male">Male <input type="radio" ng-model="user.gender" value="female">Female<br>
+			<input type="checkbox" ng-model="user.agree" name="uAgree" required> I have an account <input type="text" ng-show="user.agree" ng-model="user.haveAccount" placeholder="Client number" required><br>
+			<small ng-show="!user.agree || !user.haveAccount">*Make sure to provide account details</small>
+			<button ng-click="reset()" ng-disabled="isUnchanged(user)">RESET</button>
+			<button ng-click="update(user)" ng-disabled="form.$invalid || isUnchanged(user)">SAVE</button>
+		</form>
+		<pre>form = {{ user | json }}</pre>
+		<pre>master = {{ master | json }}</pre>
+	</div>
+
+	<!--
+	*
+	* Load AngularJS from Google CDN
+	*
+	-->
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+
+	<!--
+	*
+	* Controllers
+	*
+	-->
+	<script type="text/javascript">
+		var myAppModule = angular.module('myApp', []);
+
+		myAppModule.controller('ctrl1', function($scope) {
+			// Model Obj
+			var messages = {
+				data1: 'Data binding 1',
+				data2: 'Data binding 2',
+				data3: 'Data binding 3'
+			};
+			// Store messages obj
+			$scope.messages = messages;
+		});
+
+		myAppModule.controller('ctrl2', function($scope) {
+			$scope.yourCheckEdit = true;
+			$scope.yourCheckEdit2 = false;
+		});
+
+		myAppModule.controller('StartUpController', function($scope) {
+			// default value of the input
+			$scope.funding = { startEstimate: 0 };
+			// returning recommendation value
+			computeNeeded = function() {
+				$scope.funding.needed = $scope.funding.startEstimate * 10;
+			};
+			// watch for changes in ng-model
+			$scope.$watch('funding.startEstimate', computeNeeded);
+		});
+
+		myAppModule.controller('coffeeOrderControl', function($scope) {
+			$scope.quantity = 0;
+			$scope.total = 0;
+
+			$scope.requestOrder = function() {
+				if ($scope.quantity > 0) {
+					window.alert('Order completed. Thanks.');	
+				} else {
+					window.alert('Please enter quantity.');
+				}
+			};
+
+			$scope.computePrice = function() {
+				$scope.total = $scope.quantity * 4.50;
+			};
+
+			$scope.resetOrder = function() {
+				$scope.quantity = 0;
+				$scope.computePrice();
+			};
+		});
+
+		myAppModule.controller('formController1', ['$scope', function($scope){
+			$scope.master = {};
+
+			$scope.update = function(user) {
+				$scope.master = angular.copy(user);
+			};
+
+			$scope.reset = function() {
+				$scope.user = angular.copy($scope.master);
+			};
+
+			$scope.isUnchanged = function(user) {
+				return angular.equals(user, $scope.master);
+			};
+
+			$scope.reset();
+		}]);
+	</script>
+</body>
+</html>
